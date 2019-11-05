@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <cstring>
 #include <cstdlib>
+#include <fstream>
 
 using namespace std;
 
@@ -28,14 +29,60 @@ int fdmax;
 void *ChildThread(void *newfd) {
     char buf[MAX_LINE];
     int nbytes;
-    int i, j;
+    
     long childSocket = (long) newfd;
 	
-	bool johnloggedin = true;
-	bool isjohn = true;
+	int i = 0;
+	int itotal = 0;
+	string messages[20];
+	string quit = "quit";
+	string msgget = "msgget";
+	bool isJlogin = false;
+	bool isMlogin = false;
+	bool isDlogin = false;
+	bool isRlogin = false;
+	string sendjohn = "send john";
+	string sendmary = "send mary";
+	string senddavid = "send david";
+	string sendroot = "send root";
+	string login = "login";
+	string logout = "logout";
+	string stdown = "shutdown";
+	string msgstore = "msgstore";
+	bool shutdown = false;
+	// Credentials
+	string loginAcc1 = "login root root01";
+	string loginAcc2 = "login john john01";
+	string loginAcc3 = "login david david01";
+	string loginAcc4 = "login mary mary01";
+	
+	ifstream ifile;
+	ofstream ofile;
+	
+	// File read and store messages from
+	ifile.open("messages.txt");
+	int j = 0;
+	if(ifile.is_open())
+	{
+		getline(ifile, messages[j]);
+		messages[j] += '\n';
+		messages[j] += '\0';
+		while(ifile)
+		{	
+			++j;
+			++itotal;
+			getline(ifile, messages[j]);
+			messages[j] += '\n';
+			messages[j] += '\0';
+		}
+	}
+	ifile.close();
+	
+	// File write and store messages to
+	
+	ofile.open("messages.txt", ios::out | ios::app);
 	
 	string temp;
-	string sendjohn = "send john";
 	
     while(1) {
         // handle data from a client
@@ -61,17 +108,28 @@ void *ChildThread(void *newfd) {
 				{				
 					if (j != listener && j != childSocket) // except the listener and ourselves
 					{
-						temp = "The other window\n";
+						/*temp = "The other window\n";
 						strcpy(buf,temp.c_str());
 						if (send(j, buf, sizeof(buf), 0) == -1) 
-							perror("send");
+							perror("send");*/
 					}
 					if(j == childSocket) // for ourselves except listener
 					{
-						temp = "The same window\n";
+						if(strcmp(buf, msgget.c_str()) == 10)
+						{
+							temp = messages[i];
+							temp += "\n";
+							strcpy(buf, temp.c_str());
+							i++;
+							if(i == itotal)
+								i = 0;
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+							perror("send");
+						}
+						/*temp = "The same window\n";
 						strcpy(buf,temp.c_str());
 						if (send(j, buf, sizeof(buf), 0) == -1) 
-							perror("send");
+							perror("send");*/
 					}
 				}
             }
@@ -82,6 +140,8 @@ void *ChildThread(void *newfd) {
 
 int main(void)
 {
+
+	
     struct sockaddr_in myaddr;     // server address
     struct sockaddr_in remoteaddr; // client address
     int newfd;        // newly accept()ed socket descriptor

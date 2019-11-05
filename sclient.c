@@ -31,6 +31,14 @@ int main(int argc, char * argv[]) {
     int len;
     int s;
 	string temp;
+
+	string quit = "quit";
+	string msgget = "msgget";
+	string login = "login";
+	string logout = "logout";
+	string shutdown = "shutdown";
+	string msgstore = "msgstore";
+	
 	string sendjohn = "send john";
 
     FD_ZERO(&master);    // clear the master and temp sets
@@ -87,7 +95,14 @@ int main(int argc, char * argv[]) {
 				buf[MAX_LINE -1] = '\0';
 				len = strlen(buf) + 1;
 				
-				// lolsend john
+				// MSGGET
+		
+				if(strcmp(buf, msgget.c_str()) == 10)
+				{
+					send (s, buf, len, 0);
+				}
+				
+				// SEND
 				if(strcmp(buf, sendjohn.c_str()) == 10) {
 					send (s, buf, len, 0);
 				}
@@ -103,7 +118,7 @@ int main(int argc, char * argv[]) {
 			// handle data from the server
 			if (recv(s, buf, sizeof(buf), 0) > 0) {
 				
-				cout << "S:" << buf;
+				cout << "S: " << buf;
 			}
         }
     }
