@@ -28,16 +28,19 @@ int main(int argc, char * argv[]) {
 
     struct sockaddr_in sin;
     char buf[MAX_LINE];
+	char fbuf[MAX_LINE];
     int len;
     int s;
+	bool strmsg = false;
 	string temp;
 
-	string quit = "quit";
-	string msgget = "msgget";
-	string login = "login";
-	string logout = "logout";
-	string shutdown = "shutdown";
-	string msgstore = "msgstore";
+	string quit = "QUIT";
+	string msgget = "MSGGET";
+	string login = "LOGIN";
+	string logout = "LOGOUT";
+	string shutdown = "SHUTDOWN";
+	string msgstore = "MSGSTORE";
+	string senduser = "SEND";
 	
 	string sendjohn = "send john";
 
@@ -86,14 +89,19 @@ int main(int argc, char * argv[]) {
 			// handle the user input
 			if (fgets(buf, sizeof(buf), stdin)){
 				
-				// Lowercases all input to unify commands
-				for (int i = 0; i < MAX_LINE; i++)
-				{
-				   buf[i] = tolower(buf[i]);
-				}
-				
 				buf[MAX_LINE -1] = '\0';
 				len = strlen(buf) + 1;
+				
+				// LOGIN
+				strcpy(fbuf, buf);
+				if(strcmp(fbuf,login.c_str()) == 32)
+				{
+					strncpy(buf,fbuf,6);
+					if (strcmp(buf, login.c_str()) == 32)
+					{
+						send(s, fbuf, len, 0);
+					}	
+				}
 				
 				// MSGGET
 		
@@ -102,12 +110,29 @@ int main(int argc, char * argv[]) {
 					send (s, buf, len, 0);
 				}
 				
-				// SEND
-				if(strcmp(buf, sendjohn.c_str()) == 10) {
+				// MSGSTORE
+				
+				if(strmsg)
+				{
+					//cout << "In here" << endl;
+					strmsg = false;
 					send (s, buf, len, 0);
 				}
 				
+				if(strcmp(buf, msgstore.c_str()) == 10)
+				{
+					strmsg = true;
+					send (s, buf, len, 0);
+					
+				}
 				
+				
+				
+				// SEND
+				if(strcmp(buf, sendjohn.c_str()) == 10) 
+				{
+					send (s, buf, len, 0);
+				}
 				
 			} else {
 				break;
@@ -117,7 +142,6 @@ int main(int argc, char * argv[]) {
 		if (FD_ISSET(s, &read_fds)) {
 			// handle data from the server
 			if (recv(s, buf, sizeof(buf), 0) > 0) {
-				
 				cout << "S: " << buf;
 			}
         }

@@ -25,6 +25,16 @@ fd_set master;   // master file descriptor list
 int listener;    // listening socket descriptor
 int fdmax;
 
+void substring(char s[], char sub[], int p, int l) {
+   int c = 0;
+   
+   while (c < l) {
+      sub[c] = s[p+c-1];
+      c++;
+   }
+   sub[c] = '\0';
+}
+
 // the child thread
 void *ChildThread(void *newfd) {
     char buf[MAX_LINE];
@@ -35,26 +45,27 @@ void *ChildThread(void *newfd) {
 	int i = 0;
 	int itotal = 0;
 	string messages[20];
-	string quit = "quit";
-	string msgget = "msgget";
+	string quit = "QUIT";
+	string msgget = "MSGGET";
 	bool isJlogin = false;
 	bool isMlogin = false;
 	bool isDlogin = false;
 	bool isRlogin = false;
-	string sendjohn = "send john";
-	string sendmary = "send mary";
-	string senddavid = "send david";
-	string sendroot = "send root";
-	string login = "login";
-	string logout = "logout";
-	string stdown = "shutdown";
-	string msgstore = "msgstore";
+	string sendjohn = "SEND john";
+	string sendmary = "SEND mary";
+	string senddavid = "SEND david";
+	string sendroot = "SEND root";
+	string login = "LOGIN";
+	string logout = "LOGOUT";
+	string stdown = "SHUTDOWN";
+	string msgstore = "MSGSTORE";
+	bool getmessage = false;
 	bool shutdown = false;
 	// Credentials
-	string loginAcc1 = "login root root01";
-	string loginAcc2 = "login john john01";
-	string loginAcc3 = "login david david01";
-	string loginAcc4 = "login mary mary01";
+	string loginAcc1 = "LOGIN root root01";
+	string loginAcc2 = "LOGIN john john01";
+	string loginAcc3 = "LOGIN david david01";
+	string loginAcc4 = "LOGIN mary mary01";
 	
 	ifstream ifile;
 	ofstream ofile;
@@ -105,7 +116,8 @@ void *ChildThread(void *newfd) {
 			for(j = 0; j <= fdmax; j++) {
                 // send to everyone!
                 if (FD_ISSET(j, &master)) 					
-				{				
+				{
+			
 					if (j != listener && j != childSocket) // except the listener and ourselves
 					{
 						/*temp = "The other window\n";
@@ -115,7 +127,30 @@ void *ChildThread(void *newfd) {
 					}
 					if(j == childSocket) // for ourselves except listener
 					{
-						if(strcmp(buf, msgget.c_str()) == 10)
+						
+						if(getmessage)
+						{
+							getmessage = false;
+							//cout << "*" << buf << "*" << endl;
+							temp = buf;
+							if(itotal < 20) 
+							{
+								messages[itotal] = temp;
+								++itotal;
+								ofile.write(temp.c_str(),strlen(temp.c_str()));
+								temp = "200 OK\n";
+								strcpy(buf, temp.c_str());
+							}
+							else
+							{
+								temp = "402 No more space max limit exceed\n";
+								strcpy(buf, temp.c_str());
+							}
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
+						if(strcmp(buf, msgget.c_str()) == 10) // MSGGET
 						{
 							temp = messages[i];
 							temp += "\n";
@@ -124,8 +159,67 @@ void *ChildThread(void *newfd) {
 							if(i == itotal)
 								i = 0;
 							if (send(j, buf, sizeof(buf), 0) == -1) 
-							perror("send");
+								perror("send");
 						}
+						
+						if(strcmp(buf, loginAcc1.c_str()) == 10) // LOGIN root root01
+						{
+							isRlogin = true;
+							temp = "200 OK\n";
+							strcpy(buf, temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						else if(strcmp(buf, loginAcc2.c_str()) == 10) // LOGIN john john01
+						{
+							isJlogin = true;
+							temp = "200 OK\n";
+							strcpy(buf, temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						else if(strcmp(buf, loginAcc2.c_str()) == 10) // LOGIN david david01
+						{
+							isDlogin = true;
+							temp = "200 OK\n";
+							strcpy(buf, temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						else if(strcmp(buf, loginAcc2.c_str()) == 10) // LOGIN mary mary01
+						{
+							isMlogin = true;
+							temp = "200 OK\n";
+							strcpy(buf, temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						else if(strcmp(buf, login.c_str()) == 32)	// LOGIN <anything else> unspecified
+						{
+							temp = "410 Wrong UserID or Password\n";
+							strcpy(buf, temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
+						if(strcmp(buf, msgstore.c_str()) == 10)	// MSGSTORE
+						{
+							if(isDlogin || isJlogin || isMlogin || isRlogin)
+							{
+								temp = "200 OK\n";
+								strcpy(buf, temp.c_str());
+								getmessage = true;
+							}
+							else
+							{
+								temp = "401 You are not currently logged in, login first\n";
+								strcpy(buf, temp.c_str());
+							}
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
+						
 						/*temp = "The same window\n";
 						strcpy(buf,temp.c_str());
 						if (send(j, buf, sizeof(buf), 0) == -1) 
