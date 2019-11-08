@@ -41,6 +41,8 @@ int main(int argc, char * argv[]) {
 	string shutdown = "SHUTDOWN";
 	string msgstore = "MSGSTORE";
 	string senduser = "SEND";
+	string stdownmsg = "200 OK Server is about to shutdown\n";
+	
 	
 	string sendjohn = "send john";
 
@@ -73,7 +75,7 @@ int main(int argc, char * argv[]) {
 
     // keep track of the biggest file descriptor
     fdmax = s; // so far, it's this one
-
+	
     /* main loop; get and send lines of text */
     while (1) {
 		
@@ -85,6 +87,8 @@ int main(int argc, char * argv[]) {
 
         // looking for data to read either from the server or the user
         if (FD_ISSET(STDIN, &read_fds)) {
+			
+			
 			
 			// handle the user input
 			if (fgets(buf, sizeof(buf), stdin)){
@@ -114,7 +118,6 @@ int main(int argc, char * argv[]) {
 				
 				if(strmsg)
 				{
-					//cout << "In here" << endl;
 					strmsg = false;
 					send (s, buf, len, 0);
 				}
@@ -126,7 +129,26 @@ int main(int argc, char * argv[]) {
 					
 				}
 				
+				// QUIT
 				
+				if(strcmp(buf, quit.c_str()) == 10)
+				{
+					break;
+				}
+				
+				// LOGOUT
+		
+				if(strcmp(buf, logout.c_str()) == 10)
+				{
+					send (s, buf, len, 0);
+				}
+				
+				// SHUTDOWN
+		
+				if(strcmp(buf, shutdown.c_str()) == 10)
+				{
+					send (s, buf, len, 0);
+				}
 				
 				// SEND
 				if(strcmp(buf, sendjohn.c_str()) == 10) 
@@ -142,8 +164,15 @@ int main(int argc, char * argv[]) {
 		if (FD_ISSET(s, &read_fds)) {
 			// handle data from the server
 			if (recv(s, buf, sizeof(buf), 0) > 0) {
+				
 				cout << "S: " << buf;
 			}
+			
+			if(strcmp(buf,stdownmsg.c_str()) == 0)
+			{
+				break;
+			}
+				
         }
     }
 

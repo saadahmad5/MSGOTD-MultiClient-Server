@@ -113,25 +113,44 @@ void *ChildThread(void *newfd) {
             // we got some data from a client
             cout << "Data: " << buf ;
 
+			if(strcmp(buf, stdown.c_str()) == 10)	// SHUTDOWN
+			{	
+				if(isRlogin)
+				{
+					shutdown = true;
+				}
+			}
+			
 			for(j = 0; j <= fdmax; j++) {
                 // send to everyone!
                 if (FD_ISSET(j, &master)) 					
 				{
-			
-					if (j != listener && j != childSocket) // except the listener and ourselves
-					{
-						/*temp = "The other window\n";
-						strcpy(buf,temp.c_str());
-						if (send(j, buf, sizeof(buf), 0) == -1) 
-							perror("send");*/
-					}
+
 					if(j == childSocket) // for ourselves except listener
 					{
 						
-						if(getmessage)
+						if(strcmp(buf, stdown.c_str()) == 10) // SHUTDOWN
+						{
+							if(!isRlogin)
+							{	
+								temp = "402 User not allowed\n";
+								strcpy(buf, temp.c_str());
+							}
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+									perror("send");
+						}
+						
+						if(shutdown)	// SHUTDOWN
+						{	
+							temp = "200 OK Server is about to shutdown\n";
+							strcpy(buf, temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
+						if(getmessage)   // Only enabled when MSGSTORE is sent
 						{
 							getmessage = false;
-							//cout << "*" << buf << "*" << endl;
 							temp = buf;
 							if(itotal < 20) 
 							{
@@ -158,6 +177,27 @@ void *ChildThread(void *newfd) {
 							i++;
 							if(i == itotal)
 								i = 0;
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
+						if(strcmp(buf, logout.c_str()) == 10)	// LOGOUT
+						{
+							temp = "401 No users logged in\n";
+							if(isRlogin) {
+								temp = "200 OK\n";
+								isRlogin = false;
+							} else if(isDlogin) {
+								temp = "200 OK\n";
+								isDlogin = false;
+							} else if(isJlogin) {
+								temp = "200 OK\n";
+								isJlogin = false;
+							} else if(isMlogin) {
+								temp = "200 OK\n";
+								isMlogin = false;
+							}
+							strcpy(buf, temp.c_str());
 							if (send(j, buf, sizeof(buf), 0) == -1) 
 								perror("send");
 						}
@@ -225,8 +265,29 @@ void *ChildThread(void *newfd) {
 						if (send(j, buf, sizeof(buf), 0) == -1) 
 							perror("send");*/
 					}
+					
+					if (j != listener && j != childSocket) // except the listener and ourselves
+					{
+						/*temp = "The other window\n";
+						strcpy(buf,temp.c_str());
+						if (send(j, buf, sizeof(buf), 0) == -1) 
+							perror("send");*/
+						
+						if(shutdown)	// SHUTDOWN
+						{	
+							temp = "200 OK Server is about to shutdown\n";
+							strcpy(buf, temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
+					}
 				}
             }
+			if(shutdown)	// SHUTDOWN
+			{
+				exit(1);
+			}
         }
     }
 }
