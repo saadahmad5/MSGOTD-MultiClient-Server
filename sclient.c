@@ -42,6 +42,8 @@ int main(int argc, char * argv[]) {
 	string msgstore = "MSGSTORE";
 	string senduser = "SEND";
 	string stdownmsg = "200 OK Server is about to shutdown\n";
+
+	string who = "WHO";
 	
 	
 	string sendjohn = "send john";
@@ -154,6 +156,11 @@ int main(int argc, char * argv[]) {
 				if(strcmp(buf, sendjohn.c_str()) == 10) 
 				{
 					send (s, buf, len, 0);
+				}
+				//Who
+				if (strcmp(buf, who.c_str()) == 10)
+				{
+					break;
 				}
 				
 			} else {

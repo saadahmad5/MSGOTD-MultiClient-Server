@@ -61,6 +61,8 @@ void *ChildThread(void *newfd) {
 	string msgstore = "MSGSTORE";
 	bool getmessage = false;
 	bool shutdown = false;
+	//Who
+	string who = 'WHO';
 	// Credentials
 	string loginAcc1 = "LOGIN root root01";
 	string loginAcc2 = "LOGIN john john01";
