@@ -366,7 +366,7 @@ int main(void)
                 exit(1);
             }
         }
-
+		system("who");
     }
     return 0;
 }
