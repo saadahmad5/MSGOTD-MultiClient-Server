@@ -18,7 +18,7 @@
 
 using namespace std;
 
-#define PORT 3542  // port we're listening on
+#define PORT 5597  // port we're listening on
 #define MAX_LINE 256
 
 fd_set master;   // master file descriptor list
@@ -35,6 +35,8 @@ void substring(char s[], char sub[], int p, int l) {
    sub[c] = '\0';
 }
 
+string list;
+
 // the child thread
 void *ChildThread(void *newfd) {
     char buf[MAX_LINE];
@@ -47,6 +49,7 @@ void *ChildThread(void *newfd) {
 	string messages[20];
 	string quit = "QUIT";
 	string msgget = "MSGGET";
+	bool msgsendjohn = false;
 	bool isJlogin = false;
 	bool isMlogin = false;
 	bool isDlogin = false;
@@ -55,14 +58,15 @@ void *ChildThread(void *newfd) {
 	string sendmary = "SEND mary";
 	string senddavid = "SEND david";
 	string sendroot = "SEND root";
+	string who = "WHO";
 	string login = "LOGIN";
 	string logout = "LOGOUT";
 	string stdown = "SHUTDOWN";
 	string msgstore = "MSGSTORE";
+	
 	bool getmessage = false;
 	bool shutdown = false;
-	//Who
-	string who = 'WHO';
+	bool msgsnd = false;
 	// Credentials
 	string loginAcc1 = "LOGIN root root01";
 	string loginAcc2 = "LOGIN john john01";
@@ -90,7 +94,7 @@ void *ChildThread(void *newfd) {
 		}
 	}
 	ifile.close();
-	
+
 	// File write and store messages to
 	
 	ofile.open("messages.txt", ios::out | ios::app);
@@ -123,13 +127,56 @@ void *ChildThread(void *newfd) {
 				}
 			}
 			
+			if(strcmp(buf, sendjohn.c_str()) == 10)	// SEND john
+			{	
+				if(isRlogin || isDlogin || isMlogin)
+				{
+					msgsendjohn = true;
+				}
+			}
+
+			
 			for(j = 0; j <= fdmax; j++) {
                 // send to everyone!
                 if (FD_ISSET(j, &master)) 					
 				{
+					if(j != listener) // for all except listener
+					{
+						
+						
 
+					}
 					if(j == childSocket) // for ourselves except listener
 					{
+						
+						if(strcmp(buf, sendjohn.c_str()) == 10) // SEND john
+						{
+							if(isRlogin | isDlogin | isMlogin) {
+								if(msgsendjohn)
+								{
+									temp = "200 OK Type message...\n";
+									strcpy(buf, temp.c_str());
+									if (send(j, buf, sizeof(buf), 0) == -1) 
+										perror("send");
+								} 
+							} else {
+								temp = "420 User not allowed\n";
+								strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1) 
+									perror("send");
+								}
+						}
+						
+						if(strcmp(buf, who.c_str()) == 10) // WHO command
+						{
+							temp = "200 OK\nThe list of active users:\n";
+							temp += list;
+							
+							strcpy(buf,temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+									perror("send");
+							
+						}
 						
 						if(strcmp(buf, stdown.c_str()) == 10) // SHUTDOWN
 						{
@@ -142,7 +189,7 @@ void *ChildThread(void *newfd) {
 									perror("send");
 						}
 						
-						if(shutdown)	// SHUTDOWN
+						if(shutdown)	// Only enabled when SHUTDOWN is sent
 						{	
 							temp = "200 OK Server is about to shutdown\n";
 							strcpy(buf, temp.c_str());
@@ -189,13 +236,16 @@ void *ChildThread(void *newfd) {
 							if(isRlogin) {
 								temp = "200 OK\n";
 								isRlogin = false;
-							} else if(isDlogin) {
+							}
+							if(isDlogin) {
 								temp = "200 OK\n";
 								isDlogin = false;
-							} else if(isJlogin) {
+							}
+							if(isJlogin) {
 								temp = "200 OK\n";
 								isJlogin = false;
-							} else if(isMlogin) {
+							}
+							if(isMlogin) {
 								temp = "200 OK\n";
 								isMlogin = false;
 							}
@@ -207,7 +257,7 @@ void *ChildThread(void *newfd) {
 						if(strcmp(buf, loginAcc1.c_str()) == 10) // LOGIN root root01
 						{
 							isRlogin = true;
-							temp = "200 OK\n";
+							temp = "200 OK root logged in\n";
 							strcpy(buf, temp.c_str());
 							if (send(j, buf, sizeof(buf), 0) == -1) 
 								perror("send");
@@ -215,23 +265,23 @@ void *ChildThread(void *newfd) {
 						else if(strcmp(buf, loginAcc2.c_str()) == 10) // LOGIN john john01
 						{
 							isJlogin = true;
-							temp = "200 OK\n";
+							temp = "200 OK john logged in\n";
 							strcpy(buf, temp.c_str());
 							if (send(j, buf, sizeof(buf), 0) == -1) 
 								perror("send");
 						}
-						else if(strcmp(buf, loginAcc2.c_str()) == 10) // LOGIN david david01
+						else if(strcmp(buf, loginAcc3.c_str()) == 10) // LOGIN david david01
 						{
 							isDlogin = true;
-							temp = "200 OK\n";
+							temp = "200 OK david logged in\n";
 							strcpy(buf, temp.c_str());
 							if (send(j, buf, sizeof(buf), 0) == -1) 
 								perror("send");
 						}
-						else if(strcmp(buf, loginAcc2.c_str()) == 10) // LOGIN mary mary01
+						else if(strcmp(buf, loginAcc4.c_str()) == 10) // LOGIN mary mary01
 						{
 							isMlogin = true;
-							temp = "200 OK\n";
+							temp = "200 OK mary logged in\n";
 							strcpy(buf, temp.c_str());
 							if (send(j, buf, sizeof(buf), 0) == -1) 
 								perror("send");
@@ -248,7 +298,7 @@ void *ChildThread(void *newfd) {
 						{
 							if(isDlogin || isJlogin || isMlogin || isRlogin)
 							{
-								temp = "200 OK\n";
+								temp = "200 OK Type message...\n";
 								strcpy(buf, temp.c_str());
 								getmessage = true;
 							}
@@ -274,6 +324,16 @@ void *ChildThread(void *newfd) {
 						strcpy(buf,temp.c_str());
 						if (send(j, buf, sizeof(buf), 0) == -1) 
 							perror("send");*/
+					
+					
+						
+						if(msgsendjohn)
+						{
+							temp = "MSGSNDJOHN";
+							strcpy(buf,temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
 						
 						if(shutdown)	// SHUTDOWN
 						{	
@@ -285,11 +345,15 @@ void *ChildThread(void *newfd) {
 						
 					}
 				}
+				
             }
+			//
+			
 			if(shutdown)	// SHUTDOWN
 			{
 				exit(1);
 			}
+			
         }
     }
 }
@@ -357,6 +421,9 @@ int main(void)
 		 		 << inet_ntoa(remoteaddr.sin_addr)
                  << " socket " << newfd << endl;
 
+			list += inet_ntoa(remoteaddr.sin_addr);
+			list += '\n';
+			
             if (newfd > fdmax) {    // keep track of the maximum
                 fdmax = newfd;
             }
@@ -366,7 +433,7 @@ int main(void)
                 exit(1);
             }
         }
-		system("who");
+
     }
     return 0;
 }

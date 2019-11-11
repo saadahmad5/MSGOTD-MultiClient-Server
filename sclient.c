@@ -16,9 +16,19 @@
 
 using namespace std;
 
-#define SERVER_PORT 3542
+#define SERVER_PORT 5597
 #define MAX_LINE 256
 #define STDIN 0
+
+void substring(char s[], char sub[], int p, int l) {
+   int c = 0;
+   
+   while (c < l) {
+      sub[c] = s[p+c-1];
+      c++;
+   }
+   sub[c] = '\0';
+}
 
 int main(int argc, char * argv[]) {
 
@@ -42,11 +52,25 @@ int main(int argc, char * argv[]) {
 	string msgstore = "MSGSTORE";
 	string senduser = "SEND";
 	string stdownmsg = "200 OK Server is about to shutdown\n";
-
+	string windowRoot = "200 OK root logged in\n";
+	string windowJohn = "200 OK john logged in\n";
+	string windowDavid = "200 OK david logged in\n";
+	string windowMary = "200 OK mary logged in\n";
+	string sendmsg = "MSGSNDJOHN";
 	string who = "WHO";
+	bool sndmsg = false;
+	bool showmsg = false;
+	string loginAcc1 = "LOGIN root root01";
+	string loginAcc2 = "LOGIN john john01";
+	string loginAcc3 = "LOGIN david david01";
+	string loginAcc4 = "LOGIN mary mary01";
 	
+	bool isRoot = false;
+	bool isJohn = false;
+	bool isDavid = false;
+	bool isMary = false;
 	
-	string sendjohn = "send john";
+	string sendjohn = "SEND john";
 
     FD_ZERO(&master);    // clear the master and temp sets
     FD_ZERO(&read_fds);
@@ -91,7 +115,6 @@ int main(int argc, char * argv[]) {
         if (FD_ISSET(STDIN, &read_fds)) {
 			
 			
-			
 			// handle the user input
 			if (fgets(buf, sizeof(buf), stdin)){
 				
@@ -99,14 +122,25 @@ int main(int argc, char * argv[]) {
 				len = strlen(buf) + 1;
 				
 				// LOGIN
-				strcpy(fbuf, buf);
-				if(strcmp(fbuf,login.c_str()) == 32)
+				if(strcmp(buf,loginAcc1.c_str()) == 10)
 				{
-					strncpy(buf,fbuf,6);
-					if (strcmp(buf, login.c_str()) == 32)
-					{
-						send(s, fbuf, len, 0);
-					}	
+					send(s, buf, len, 0);
+				} else if(strcmp(buf,loginAcc2.c_str()) == 10)
+				{
+					send(s, buf, len, 0);
+				} else if(strcmp(buf,loginAcc3.c_str()) == 10)
+				{
+					send(s, buf, len, 0);
+				} else if(strcmp(buf,loginAcc4.c_str()) == 10)
+				{
+					send(s, buf, len, 0);
+				}
+				
+				// WHO
+		
+				if(strcmp(buf, who.c_str()) == 10)
+				{
+					send (s, buf, len, 0);
 				}
 				
 				// MSGGET
@@ -152,15 +186,17 @@ int main(int argc, char * argv[]) {
 					send (s, buf, len, 0);
 				}
 				
-				// SEND
-				if(strcmp(buf, sendjohn.c_str()) == 10) 
+				// SEND john
+				if(sndmsg)
 				{
+					sndmsg = false;
 					send (s, buf, len, 0);
 				}
-				//Who
-				if (strcmp(buf, who.c_str()) == 10)
+				
+				if(strcmp(buf, sendjohn.c_str()) == 10) 
 				{
-					break;
+					sndmsg = true;
+					send (s, buf, len, 0);
 				}
 				
 			} else {
@@ -171,8 +207,16 @@ int main(int argc, char * argv[]) {
 		if (FD_ISSET(s, &read_fds)) {
 			// handle data from the server
 			if (recv(s, buf, sizeof(buf), 0) > 0) {
-				
+					
 				cout << "S: " << buf;
+			
+				if(strcmp(buf,windowJohn.c_str()) == 0)
+				{
+					isJohn = true;
+					
+				}
+				
+				
 			}
 			
 			if(strcmp(buf,stdownmsg.c_str()) == 0)
