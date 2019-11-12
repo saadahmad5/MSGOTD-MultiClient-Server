@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#define SERVER_PORT 5597
+#define SERVER_PORT 1997
 #define MAX_LINE 256
 #define STDIN 0
 
@@ -56,7 +56,7 @@ int main(int argc, char * argv[]) {
 	string windowJohn = "200 OK john logged in\n";
 	string windowDavid = "200 OK david logged in\n";
 	string windowMary = "200 OK mary logged in\n";
-	string sendmsg = "MSGSNDJOHN";
+	string msgsndjohn = "MSGSNDJOHN\n";
 	string who = "WHO";
 	bool sndmsg = false;
 	bool showmsg = false;
@@ -154,6 +154,10 @@ int main(int argc, char * argv[]) {
 				
 				if(strmsg)
 				{
+					for (int i = 0; i < MAX_LINE; i++)
+					{
+					   buf[i] = tolower(buf[i]);
+					}
 					strmsg = false;
 					send (s, buf, len, 0);
 				}
@@ -190,6 +194,10 @@ int main(int argc, char * argv[]) {
 				if(sndmsg)
 				{
 					sndmsg = false;
+					for (int i = 0; i < MAX_LINE; i++)
+					{
+					   buf[i] = tolower(buf[i]);
+					}
 					send (s, buf, len, 0);
 				}
 				
@@ -208,7 +216,24 @@ int main(int argc, char * argv[]) {
 			// handle data from the server
 			if (recv(s, buf, sizeof(buf), 0) > 0) {
 					
-				cout << "S: " << buf;
+				
+				if(showmsg)
+				{
+					showmsg = false;
+					if(isJohn)
+						cout << "MSG: " << buf;
+					
+				}
+				
+				else if(strcmp(buf,msgsndjohn.c_str()) == 0)
+				{
+					cout << "";
+					showmsg = true;
+				}
+				else
+					cout << "S: " << buf;
+			
+				
 			
 				if(strcmp(buf,windowJohn.c_str()) == 0)
 				{
