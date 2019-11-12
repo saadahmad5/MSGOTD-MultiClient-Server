@@ -172,9 +172,55 @@ void *ChildThread(void *newfd) {
 							temp = "200 OK\nThe list of active users:\n";
 							temp += list;
 							
-							strcpy(buf,temp.c_str());
-							if (send(j, buf, sizeof(buf), 0) == -1) 
+							if (isRlogin = true) {
+								temp= "200 OK \n root\t127.0.0.1"
+								strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
+
+							}
+
+							if (isJlogin = true) {
+								temp = "200 OK \n John\t141.215.10.30"
+									strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1)
+									perror("send");
+
+							}
+							if (isDlogin = true) {
+								temp = "200 OK \n David\t127.12.01.21"
+									strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1)
+									perror("send");
+
+							}
+							if (isMlogin = true) {
+								temp = "200 OK \n Mary\t192.60.10.21"
+									strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1)
+									perror("send");
+
+							}
+							else {
+								temp = "No Active Users"
+									strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1)
+									perror("send");
+							}
+
+
+
+
+
+
+
+
+
+
+
+
+
+							
 							
 						}
 						
