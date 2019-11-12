@@ -174,43 +174,43 @@ void *ChildThread(void *newfd) {
 							
 
 							if (isRlogin = true) {
-								temp= "200 OK \n root\t"
-								strcpy(buf, temp.c_str());
+								temp = "200 OK \n root\t";
+								strcpy(buf, temp.c_str(), inet_ntoa(remoteaddr.sin_addr));
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
 
 							if (isJlogin = true) {
-								temp = "200 OK \n John\t"
-									strcpy(buf, temp.c_str());
+								temp = "200 OK \n John\t";
+									strcpy(buf, temp.c_str(), inet_ntoa(remoteaddr.sin_addr));
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
 							if (isDlogin = true) {
-								temp = "200 OK \n David\t"
-									strcpy(buf, temp.c_str());
+								temp = "200 OK \n David\t";
+									strcpy(buf, temp.c_str(), inet_ntoa(remoteaddr.sin_addr));
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
 							if (isMlogin = true) {
-								temp = "200 OK \n Mary\t"
-									strcpy(buf, temp.c_str());
+								temp = "200 OK \n Mary\t";
+									strcpy(buf, temp.c_str(), inet_ntoa(remoteaddr.sin_addr));
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
 							else {
-								temp = "No Active Users"
+								temp = "No Active Users";
 									strcpy(buf, temp.c_str());
 								if (send(j, buf, sizeof(buf), 0) == -1)
 
-							strcpy(buf,temp.c_str());
+							/*strcpy(buf,temp.c_str());
 							if (send(j, buf, sizeof(buf), 0) == -1) 
 
-									perror("send");
+									perror("send");*/
 							
 						}
 						
