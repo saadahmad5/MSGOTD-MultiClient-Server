@@ -173,7 +173,7 @@ void *ChildThread(void *newfd) {
 							temp += list;
 							
 							if (isRlogin = true) {
-								temp= "200 OK \n root\t127.0.0.1"
+								temp= "200 OK \n root\t"
 								strcpy(buf, temp.c_str());
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
@@ -181,21 +181,21 @@ void *ChildThread(void *newfd) {
 							}
 
 							if (isJlogin = true) {
-								temp = "200 OK \n John\t141.215.10.30"
+								temp = "200 OK \n John\t"
 									strcpy(buf, temp.c_str());
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
 							if (isDlogin = true) {
-								temp = "200 OK \n David\t127.12.01.21"
+								temp = "200 OK \n David\t"
 									strcpy(buf, temp.c_str());
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
 							if (isMlogin = true) {
-								temp = "200 OK \n Mary\t192.60.10.21"
+								temp = "200 OK \n Mary\t"
 									strcpy(buf, temp.c_str());
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
@@ -464,7 +464,7 @@ int main(void)
         } else {
             FD_SET(newfd, &master); // add to master set
             cout << "multiThreadServer: new connection from "
-		 		 << inet_ntoa(remoteaddr.sin_addr)
+		 		 << inet_ntoa(remoteaddr.sin_addr)// ip address
                  << " socket " << newfd << endl;
 
 			list += inet_ntoa(remoteaddr.sin_addr);
