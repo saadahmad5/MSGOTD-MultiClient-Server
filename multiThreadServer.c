@@ -18,7 +18,7 @@
 
 using namespace std;
 
-#define PORT 5597  // port we're listening on
+#define PORT 1997  // port we're listening on
 #define MAX_LINE 256
 
 fd_set master;   // master file descriptor list
@@ -129,7 +129,7 @@ void *ChildThread(void *newfd) {
 			
 			if(strcmp(buf, sendjohn.c_str()) == 10)	// SEND john
 			{	
-				if(isRlogin || isDlogin || isMlogin)
+				if(isRlogin | isDlogin | isMlogin)
 				{
 					msgsendjohn = true;
 				}
@@ -172,6 +172,7 @@ void *ChildThread(void *newfd) {
 							temp = "200 OK\nThe list of active users:\n";
 							temp += list;
 							
+
 							if (isRlogin = true) {
 								temp= "200 OK \n root\t"
 								strcpy(buf, temp.c_str());
@@ -205,22 +206,11 @@ void *ChildThread(void *newfd) {
 								temp = "No Active Users"
 									strcpy(buf, temp.c_str());
 								if (send(j, buf, sizeof(buf), 0) == -1)
+
+							strcpy(buf,temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+
 									perror("send");
-							}
-
-
-
-
-
-
-
-
-
-
-
-
-
-							
 							
 						}
 						
@@ -371,11 +361,19 @@ void *ChildThread(void *newfd) {
 						if (send(j, buf, sizeof(buf), 0) == -1) 
 							perror("send");*/
 					
-					
+						if(msgsnd)
+						{
+							temp = buf;
+							//temp += '\n';
+							//cout << "MSG: " << temp << endl;
+							strcpy(buf,temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
 						
 						if(msgsendjohn)
 						{
-							temp = "MSGSNDJOHN";
+							temp = "MSGSNDJOHN\n";
 							strcpy(buf,temp.c_str());
 							if (send(j, buf, sizeof(buf), 0) == -1) 
 								perror("send");
@@ -393,7 +391,13 @@ void *ChildThread(void *newfd) {
 				}
 				
             }
+			if(msgsnd)
+				msgsnd = false;
 			//
+			if(msgsendjohn) {
+				msgsnd = true;
+				msgsendjohn = false;
+			}
 			
 			if(shutdown)	// SHUTDOWN
 			{
