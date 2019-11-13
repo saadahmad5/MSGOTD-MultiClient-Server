@@ -173,31 +173,35 @@ void *ChildThread(void *newfd) {
 							temp += list;
 							
 
-							if (isRlogin = true) {
+							if (isRlogin) {
 								temp = "200 OK \n root\t";
-								strcpy(buf, temp.c_str(), inet_ntoa(remoteaddr.sin_addr));
+								strcpy(buf, temp.c_str());
+								strcpy(buf, inet_ntoa(remoteaddr.sin_addr));
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
 
-							if (isJlogin = true) {
+							if (isJlogi) {
 								temp = "200 OK \n John\t";
-									strcpy(buf, temp.c_str(), inet_ntoa(remoteaddr.sin_addr));
+									strcpy(buf, temp.c_str());
+									strcpy(buf, inet_ntoa(remoteaddr.sin_addr));
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
-							if (isDlogin = true) {
+							if (isDlogin) {
 								temp = "200 OK \n David\t";
-									strcpy(buf, temp.c_str(), inet_ntoa(remoteaddr.sin_addr));
+									strcpy(buf, temp.c_str());
+									strcpy(buf, inet_ntoa(remoteaddr.sin_addr));
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
 							}
-							if (isMlogin = true) {
+							if (isMlogin) {
 								temp = "200 OK \n Mary\t";
-									strcpy(buf, temp.c_str(), inet_ntoa(remoteaddr.sin_addr));
+									strcpy(buf, temp.c_str());
+									strcpy(buf, inet_ntoa(remoteaddr.sin_addr));
 								if (send(j, buf, sizeof(buf), 0) == -1)
 									perror("send");
 
