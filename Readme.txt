@@ -1,4 +1,4 @@
-YAMOTD Client-Server Program
+YAMOTD Client-MultiServer Program
 		written by:
 Grp# 5: Saad Ahmad & Shahriyar Chowdhury
 		submitted to:
