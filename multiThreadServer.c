@@ -49,7 +49,10 @@ void *ChildThread(void *newfd) {
 	string messages[20];
 	string quit = "QUIT";
 	string msgget = "MSGGET";
+	bool msgsendroot = false;
 	bool msgsendjohn = false;
+	bool msgsenddavid = false;
+	bool msgsendmary = false;
 	bool isJlogin = false;
 	bool isMlogin = false;
 	bool isDlogin = false;
@@ -134,6 +137,30 @@ void *ChildThread(void *newfd) {
 					msgsendjohn = true;
 				}
 			}
+			
+			if(strcmp(buf, sendroot.c_str()) == 10)	// SEND root
+			{	
+				if(isJlogin | isDlogin | isMlogin)
+				{
+					msgsendroot = true;
+				}
+			}
+			
+			if(strcmp(buf, senddavid.c_str()) == 10)	// SEND david
+			{	
+				if(isRlogin | isJlogin | isMlogin)
+				{
+					msgsenddavid = true;
+				}
+			}
+			
+			if(strcmp(buf, sendmary.c_str()) == 10)	// SEND mary
+			{	
+				if(isRlogin | isDlogin | isJlogin)
+				{
+					msgsendmary = true;
+				}
+			}
 
 			
 			for(j = 0; j <= fdmax; j++) {
@@ -167,54 +194,68 @@ void *ChildThread(void *newfd) {
 								}
 						}
 						
+						if(strcmp(buf, sendroot.c_str()) == 10) // SEND root
+						{
+							if(isJlogin | isDlogin | isMlogin) {
+								if(msgsendroot)
+								{
+									temp = "200 OK Type message...\n";
+									strcpy(buf, temp.c_str());
+									if (send(j, buf, sizeof(buf), 0) == -1) 
+										perror("send");
+								} 
+							} else {
+								temp = "420 User not allowed\n";
+								strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1) 
+									perror("send");
+								}
+						}
+						
+						if(strcmp(buf, senddavid.c_str()) == 10) // SEND david
+						{
+							if(isJlogin | isRlogin | isMlogin) {
+								if(msgsenddavid)
+								{
+									temp = "200 OK Type message...\n";
+									strcpy(buf, temp.c_str());
+									if (send(j, buf, sizeof(buf), 0) == -1) 
+										perror("send");
+								} 
+							} else {
+								temp = "420 User not allowed\n";
+								strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1) 
+									perror("send");
+								}
+						}
+						
+						if(strcmp(buf, sendmary.c_str()) == 10) // SEND mary
+						{
+							if(isJlogin | isDlogin | isRlogin) {
+								if(msgsendmary)
+								{
+									temp = "200 OK Type message...\n";
+									strcpy(buf, temp.c_str());
+									if (send(j, buf, sizeof(buf), 0) == -1) 
+										perror("send");
+								} 
+							} else {
+								temp = "420 User not allowed\n";
+								strcpy(buf, temp.c_str());
+								if (send(j, buf, sizeof(buf), 0) == -1) 
+									perror("send");
+								}
+						}
+						
 						if(strcmp(buf, who.c_str()) == 10) // WHO command
 						{
-							temp = "200 OK\nThe list of active users:\n";
+							temp = "200 OK\nThe list of users:\n";
 							temp += list;
 							
-
-							if (isRlogin) {
-								temp = "200 OK \n root\t";
-								strcpy(buf, temp.c_str());
-								strcpy(buf, inet_ntoa(remoteaddr.sin_addr));
-								if (send(j, buf, sizeof(buf), 0) == -1)
-									perror("send");
-
-							}
-
-							if (isJlogi) {
-								temp = "200 OK \n John\t";
-									strcpy(buf, temp.c_str());
-									strcpy(buf, inet_ntoa(remoteaddr.sin_addr));
-								if (send(j, buf, sizeof(buf), 0) == -1)
-									perror("send");
-
-							}
-							if (isDlogin) {
-								temp = "200 OK \n David\t";
-									strcpy(buf, temp.c_str());
-									strcpy(buf, inet_ntoa(remoteaddr.sin_addr));
-								if (send(j, buf, sizeof(buf), 0) == -1)
-									perror("send");
-
-							}
-							if (isMlogin) {
-								temp = "200 OK \n Mary\t";
-									strcpy(buf, temp.c_str());
-									strcpy(buf, inet_ntoa(remoteaddr.sin_addr));
-								if (send(j, buf, sizeof(buf), 0) == -1)
-									perror("send");
-
-							}
-							else {
-								temp = "No Active Users";
-									strcpy(buf, temp.c_str());
-								if (send(j, buf, sizeof(buf), 0) == -1)
-
-							/*strcpy(buf,temp.c_str());
+							strcpy(buf,temp.c_str());
 							if (send(j, buf, sizeof(buf), 0) == -1) 
-
-									perror("send");*/
+									perror("send");
 							
 						}
 						
@@ -383,6 +424,30 @@ void *ChildThread(void *newfd) {
 								perror("send");
 						}
 						
+						if(msgsendroot)
+						{
+							temp = "MSGSNDROOT\n";
+							strcpy(buf,temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
+						if(msgsenddavid)
+						{
+							temp = "MSGSNDDAVID\n";
+							strcpy(buf,temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
+						if(msgsendmary)
+						{
+							temp = "MSGSNDMARY\n";
+							strcpy(buf,temp.c_str());
+							if (send(j, buf, sizeof(buf), 0) == -1) 
+								perror("send");
+						}
+						
 						if(shutdown)	// SHUTDOWN
 						{	
 							temp = "200 OK Server is about to shutdown\n";
@@ -401,6 +466,21 @@ void *ChildThread(void *newfd) {
 			if(msgsendjohn) {
 				msgsnd = true;
 				msgsendjohn = false;
+			}
+			
+			if(msgsendroot) {
+				msgsnd = true;
+				msgsendroot = false;
+			}
+			
+			if(msgsenddavid) {
+				msgsnd = true;
+				msgsenddavid = false;
+			}
+			
+			if(msgsendmary) {
+				msgsnd = true;
+				msgsendmary = false;
 			}
 			
 			if(shutdown)	// SHUTDOWN
@@ -472,7 +552,7 @@ int main(void)
         } else {
             FD_SET(newfd, &master); // add to master set
             cout << "multiThreadServer: new connection from "
-		 		 << inet_ntoa(remoteaddr.sin_addr)// ip address
+		 		 << inet_ntoa(remoteaddr.sin_addr)
                  << " socket " << newfd << endl;
 
 			list += inet_ntoa(remoteaddr.sin_addr);

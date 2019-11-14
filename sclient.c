@@ -57,9 +57,15 @@ int main(int argc, char * argv[]) {
 	string windowDavid = "200 OK david logged in\n";
 	string windowMary = "200 OK mary logged in\n";
 	string msgsndjohn = "MSGSNDJOHN\n";
+	string msgsndroot = "MSGSNDROOT\n";
+	string msgsnddavid = "MSGSNDDAVID\n";
+	string msgsndmary = "MSGSNDMARY\n";
 	string who = "WHO";
 	bool sndmsg = false;
-	bool showmsg = false;
+	bool showmsgj = false;
+	bool showmsgr = false;
+	bool showmsgd = false;
+	bool showmsgm = false;
 	string loginAcc1 = "LOGIN root root01";
 	string loginAcc2 = "LOGIN john john01";
 	string loginAcc3 = "LOGIN david david01";
@@ -71,6 +77,9 @@ int main(int argc, char * argv[]) {
 	bool isMary = false;
 	
 	string sendjohn = "SEND john";
+	string sendroot = "SEND root";
+	string senddavid = "SEND david";
+	string sendmary = "SEND mary";
 
     FD_ZERO(&master);    // clear the master and temp sets
     FD_ZERO(&read_fds);
@@ -145,8 +154,9 @@ int main(int argc, char * argv[]) {
 				
 				// MSGGET
 		
-				if(strcmp(buf, msgget.c_str()) == 10)
+				if((strcmp(buf, msgget.c_str()) == 10) && (strlen(buf) == strlen(msgget.c_str())+1))
 				{
+
 					send (s, buf, len, 0);
 				}
 				
@@ -154,10 +164,7 @@ int main(int argc, char * argv[]) {
 				
 				if(strmsg)
 				{
-					for (int i = 0; i < MAX_LINE; i++)
-					{
-					   buf[i] = tolower(buf[i]);
-					}
+
 					strmsg = false;
 					send (s, buf, len, 0);
 				}
@@ -190,18 +197,30 @@ int main(int argc, char * argv[]) {
 					send (s, buf, len, 0);
 				}
 				
-				// SEND john
+				// SEND 
 				if(sndmsg)
 				{
 					sndmsg = false;
-					for (int i = 0; i < MAX_LINE; i++)
-					{
-					   buf[i] = tolower(buf[i]);
-					}
 					send (s, buf, len, 0);
+					cout << "S: 200 OK" << endl;
 				}
 				
 				if(strcmp(buf, sendjohn.c_str()) == 10) 
+				{
+					sndmsg = true;
+					send (s, buf, len, 0);
+				}
+				if(strcmp(buf, sendroot.c_str()) == 10) 
+				{
+					sndmsg = true;
+					send (s, buf, len, 0);
+				}
+				if(strcmp(buf, senddavid.c_str()) == 10) 
+				{
+					sndmsg = true;
+					send (s, buf, len, 0);
+				}
+				if(strcmp(buf, sendmary.c_str()) == 10) 
 				{
 					sndmsg = true;
 					send (s, buf, len, 0);
@@ -215,20 +234,57 @@ int main(int argc, char * argv[]) {
 		if (FD_ISSET(s, &read_fds)) {
 			// handle data from the server
 			if (recv(s, buf, sizeof(buf), 0) > 0) {
-					
+				cout.flush();
 				
-				if(showmsg)
+				if(showmsgj)
 				{
-					showmsg = false;
+					showmsgj = false;
 					if(isJohn)
 						cout << "MSG: " << buf;
+				}
+				else if(showmsgr)
+				{
+					showmsgr = false;
+					if(isRoot)
+						cout << "MSG: " << buf;
 					
+				}
+				else if(showmsgd)
+				{
+					showmsgd = false;
+					if(isDavid)
+						cout << "MSG: " << buf;
+				}
+				else if(showmsgm)
+				{
+					showmsgm = false;
+					if(isMary)
+						cout << "MSG: " << buf;
 				}
 				
 				else if(strcmp(buf,msgsndjohn.c_str()) == 0)
 				{
 					cout << "";
-					showmsg = true;
+					
+					showmsgj = true;
+				}
+				else if(strcmp(buf,msgsndroot.c_str()) == 0)
+				{
+					cout << "";
+					
+					showmsgr = true;
+				}
+				else if(strcmp(buf,msgsnddavid.c_str()) == 0)
+				{
+					cout << "";
+					
+					showmsgd = true;
+				}
+				else if(strcmp(buf,msgsndmary.c_str()) == 0)
+				{
+					cout << "";
+					
+					showmsgm = true;
 				}
 				else
 					cout << "S: " << buf;
@@ -237,7 +293,26 @@ int main(int argc, char * argv[]) {
 			
 				if(strcmp(buf,windowJohn.c_str()) == 0)
 				{
+					cout << "";
 					isJohn = true;
+					
+				}
+				if(strcmp(buf,windowRoot.c_str()) == 0)
+				{
+					cout << "";
+					isRoot = true;
+					
+				}
+				if(strcmp(buf,windowDavid.c_str()) == 0)
+				{
+					cout << "";
+					isDavid = true;
+					
+				}
+				if(strcmp(buf,windowMary.c_str()) == 0)
+				{
+					cout << "";
+					isMary = true;
 					
 				}
 				
