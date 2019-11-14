@@ -101,7 +101,7 @@ Ex) WHO
 	127.0.0.1
 
 CAUTION:
-	Since I did not studied Operating Systems course yet, controlling
-the threads is an issue. The commands DO WORK as mentioned in this document
-but sometimes they won't due to race conditions/ buffer not flushed. 
-Due to this, SOMETIMES the output is not sent/ displayed on the client.
+	The commands DO WORK as mentioned in this document
+but sometimes SEND **** don't acknowledge to the same client most specifically
+for socket 7, 9 I don't know why. For 4, 5 sockets it acknowledges perfectly. 
+That is SOMETIMES the output is not displayed on the client. That's the only issue.
